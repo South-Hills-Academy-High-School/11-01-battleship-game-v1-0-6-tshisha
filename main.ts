@@ -68,6 +68,12 @@ function makeBoatVisible (boatArray: Sprite[]) {
         currentBoatSprite.setFlag(SpriteFlag.Invisible, false)
     }
 }
+function cpuMove () {
+    game.splash("CPU Move")
+    grid.place(cursor, tiles.getTileLocation(randint(0, 9), randint(0, 6)))
+    isHitOrMiss(boatSpriteArrayP1, hitOrMissP2)
+    switchPlayer()
+}
 function isPlayerXWinner (enemyBoats: Sprite[][], hitOrMissPX: Sprite[]) {
     killCount = 0
     for (let index = 0; index <= 2; index++) {
@@ -94,11 +100,6 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (moveBoatFlag == 3) {
         if (currentPlayer == "Player1") {
             isHitOrMiss(boatSpriteArrayP2, hitOrMissP1)
-            switchPlayer()
-        } else if (singlePlayerFlag == 1) {
-            game.splash("CPU Move")
-            grid.place(cursor, tiles.getTileLocation(randint(0, 9), randint(0, 6)))
-            isHitOrMiss(boatSpriteArrayP1, hitOrMissP2)
             switchPlayer()
         } else {
             isHitOrMiss(boatSpriteArrayP1, hitOrMissP2)
@@ -133,6 +134,9 @@ function switchPlayer () {
         }
         makeBoatInvisible(hitOrMissP1)
         makeBoatVisible(hitOrMissP2)
+        if (singlePlayerFlag == 1 && moveBoatFlag == 3) {
+            cpuMove()
+        }
     } else {
         currentPlayer = "Player1"
         for (let boatIterator of boatSpriteArrayP2) {
@@ -143,7 +147,6 @@ function switchPlayer () {
     }
 }
 function cpuPlaceBoat0 () {
-    makeBoatVisible(boatSpriteArrayP2[0])
     if (randint(0, 1) == 0) {
         grid.place(cursor, tiles.getTileLocation(randint(0, 8), randint(0, 6)))
         grid.place(boatSpriteArrayP2[0][0], grid.add(grid.getLocation(cursor), 0, 0))
@@ -187,6 +190,13 @@ function moveBoat (boatArray: any[], boatRotateArray: string[]) {
     }
 }
 function isHitOrMiss (enemyBoats: Sprite[][], hitOrMissPX: Sprite[]) {
+    if (currentPlayer == "Player1") {
+        hitOrMissPlayer = "Player1"
+    } else if (currentPlayer == "Player2" && singlePlayerFlag == 1) {
+        hitOrMissPlayer = "CPU"
+    } else {
+        hitOrMissPlayer = "Player2"
+    }
     for (let index = 0; index <= 2; index++) {
         for (let currentBoatSprite of enemyBoats[index]) {
             if (grid.spriteCol(currentBoatSprite) == grid.spriteCol(cursor) && grid.spriteRow(currentBoatSprite) == grid.spriteRow(cursor)) {
@@ -235,7 +245,7 @@ function isHitOrMiss (enemyBoats: Sprite[][], hitOrMissPX: Sprite[]) {
         `, SpriteKind.Projectile)
     grid.place(boomSprite, grid.getLocation(cursor))
     hitOrMissPX.push(boomSprite)
-    game.splash("" + currentPlayer + " MISS!!")
+    game.splash("" + hitOrMissPlayer + " MISS!!")
     return 0
 }
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -427,7 +437,6 @@ function initP1 () {
         `, SpriteKind.Projectile)]
 }
 function cpuPlaceBoat1 () {
-    makeBoatVisible(boatSpriteArrayP2[1])
     if (randint(0, 1) == 0) {
         grid.place(cursor, tiles.getTileLocation(randint(0, 7), randint(0, 6)))
         grid.place(boatSpriteArrayP2[1][0], grid.add(grid.getLocation(cursor), 0, 0))
@@ -629,7 +638,6 @@ function makeBoatInvisible (boatArray: Sprite[]) {
     }
 }
 function cpuPlaceBoat2 () {
-    makeBoatVisible(boatSpriteArrayP2[2])
     if (randint(0, 1) == 0) {
         grid.place(cursor, tiles.getTileLocation(randint(0, 6), randint(0, 6)))
         grid.place(boatSpriteArrayP2[2][0], grid.add(grid.getLocation(cursor), 0, 0))
@@ -664,11 +672,12 @@ function isOverlapping (boatSpriteArrayPX: Sprite[][]) {
     return 0
 }
 let boomSprite: Sprite = null
+let hitOrMissPlayer = ""
 let iterator = 0
-let hitOrMissP2: Sprite[] = []
 let hitOrMissP1: Sprite[] = []
 let currentBoatBoomCounter = 0
 let killCount = 0
+let hitOrMissP2: Sprite[] = []
 let boatRotateArrayP2: string[] = []
 let boatSpriteArrayP2: Sprite[][] = []
 let boatRotateArrayP1: string[] = []
@@ -681,7 +690,11 @@ let rotateFlag = ""
 let currentPlayer = ""
 let singlePlayerFlag = 0
 tiles.setCurrentTilemap(tilemap`level1`)
-singlePlayerFlag = 1
+if (game.ask("Single player?", "Multiplayer?")) {
+    singlePlayerFlag = 1
+} else {
+    singlePlayerFlag = 0
+}
 currentPlayer = "Player1"
 initP1()
 initP2()
