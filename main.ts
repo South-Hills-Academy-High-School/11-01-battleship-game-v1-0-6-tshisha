@@ -97,7 +97,10 @@ function isPlayerXWinner (enemyBoats: Sprite[][], hitOrMissPX: Sprite[]) {
     return killCount
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (moveBoatFlag == 3) {
+    let list: number[] = []
+    if (isAttackingTwice(list)) {
+    	
+    } else if (moveBoatFlag == 3) {
         if (currentPlayer == "Player1") {
             isHitOrMiss(boatSpriteArrayP2, hitOrMissP1)
             switchPlayer()
@@ -448,6 +451,14 @@ function cpuPlaceBoat1 () {
         grid.place(boatSpriteArrayP2[1][1], grid.add(grid.getLocation(cursor), 0, 1))
         grid.place(boatSpriteArrayP2[1][2], grid.add(grid.getLocation(cursor), 0, 2))
     }
+}
+function isAttackingTwice (boomSpriteArrayPX: Sprite[]) {
+    for (let currentBoomSprite of boomSpriteArrayPX) {
+        if (grid.spriteCol(currentBoomSprite) == grid.spriteCol(cursor) && grid.spriteRow(currentBoomSprite) == grid.spriteRow(cursor)) {
+            return 1
+        }
+    }
+    return 0
 }
 function initP2 () {
     hitOrMissP2 = [sprites.create(img`
